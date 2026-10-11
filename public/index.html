@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>🕷️ spiderexusX tester</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow a"></div>
+<div class="glow b"></div>
+
+<!-- ============ TOP BAR ============ -->
+<header class="topbar">
+  <div class="brand">
+    <!-- ===== ANIMATED SVG LOGO (spider-themed) ===== -->
+    <svg class="logo" id="logo" viewBox="0 0 120 120">
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#22d3ee"/>
+          <stop offset="100%" stop-color="#4ade80"/>
+        </linearGradient>
+        <radialGradient id="core" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#22d3ee"/>
+          <stop offset="100%" stop-color="#4ade80"/>
+        </radialGradient>
+      </defs>
+
+      <!-- rotating outer ring -->
+      <g class="ring-outer">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="url(#lg)"
+                stroke-width="1.8" stroke-dasharray="22 14"
+                stroke-linecap="round" opacity=".8"/>
+      </g>
+
+      <!-- counter-rotating inner ring -->
+      <g class="ring-inner">
+        <circle cx="60" cy="60" r="43" fill="none" stroke="#22d3ee"
+                stroke-width="1" stroke-dasharray="4 9"
+                stroke-linecap="round" opacity=".55"/>
+      </g>
+
+      <!-- hexagon shield -->
+      <polygon class="hex" points="60,20 94,38 94,74 60,100 26,74 26,38"
+               fill="rgba(34,211,238,.045)" stroke="url(#lg)"
+               stroke-width="2.6" stroke-linejoin="round"/>
+
+      <!-- spider legs (8 lines radiating) -->
+      <g class="legs" stroke="url(#lg)" stroke-width="1.6" stroke-linecap="round" opacity=".75">
+        <line x1="60" y1="60" x2="30" y2="30"/>
+        <line x1="60" y1="60" x2="90" y2="30"/>
+        <line x1="60" y1="60" x2="22" y2="60"/>
+        <line x1="60" y1="60" x2="98" y2="60"/>
+        <line x1="60" y1="60" x2="30" y2="90"/>
+        <line x1="60" y1="60" x2="90" y2="90"/>
+        <line x1="60" y1="60" x2="40" y2="22"/>
+        <line x1="60" y1="60" x2="80" y2="22"/>
+      </g>
+
+      <!-- check mark -->
+      <path class="check" d="M44 61 L55 73 L79 45" fill="none"
+            stroke="#4ade80" stroke-width="5.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- core -->
+      <circle class="core" cx="60" cy="60" r="4" fill="url(#core)"/>
+
+      <!-- spark nodes -->
+      <circle class="spark" cx="60" cy="14" r="2.6" fill="#22d3ee"/>
+      <circle class="spark" cx="104" cy="60" r="2.6" fill="#4ade80"/>
+      <circle class="spark" cx="60" cy="106" r="2.6" fill="#22d3ee"/>
+      <circle class="spark" cx="16"  cy="60" r="2.6" fill="#4ade80"/>
+    </svg>
+
+    <div>
+      <h1>spiderexusX<span>•</span>tester</h1>
+      <p>Real Request &amp; Bypass Engine v1.0</p>
+    </div>
+  </div>
+
+  <div class="status" id="globalStatus">
+    <span class="pulse"></span><span id="statusText">IDLE</span>
+  </div>
+</header>
+
+<!-- ============ MAIN ============ -->
+<main>
+
+  <!-- ===== LEFT : CONTROLS + LOG ===== -->
+  <section class="panel">
+    <div class="panel-title">Target Configuration</div>
+
+    <div class="field">
+      <label>Base URL</label>
+      <input id="baseUrl" type="text"
+             value="http://localhost:8080"
+             placeholder="https://target.com" spellcheck="false"/>
+    </div>
+
+    <div class="field">
+      <label>Target Path (protected resource)</label>
+      <input id="targetPath" type="text" value="/admin" spellcheck="false"/>
+    </div>
+
+    <div class="field">
+      <label>HTTP Method</label>
+      <select id="method">
+        <option value="GET" selected>GET</option>
+        <option value="POST">POST</option>
+        <option value="HEAD">HEAD</option>
+        <option value="OPTIONS">OPTIONS</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Custom Headers (JSON)</label>
+      <textarea id="headers" rows="3" spellcheck="false"
+        placeholder='{"Cookie":"session=abc","Authorization":"Bearer xxx"}'></textarea>
+    </div>
+
+    <div class="field">
+      <label>Delay between requests (ms)</label>
+      <input id="delay" type="number" value="80" min="0" max="2000"/>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="startBtn">▶ START SCAN</button>
+      <button class="btn ghost" id="singleBtn">⟳ TEST REQUEST</button>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="bar"><i id="bar"></i></div>
+      <div class="bar-info">
+        <span id="phaseText">READY</span>
+        <span id="pctText">0%</span>
+      </div>
+    </div>
+
+    <div class="panel-title" style="margin-top:22px">Live Console</div>
+    <div class="log" id="log">
+      <div class="l"><span class="t">[--:--:--]</span>
+        <span class="dim">spiderexusX tester initialized. Awaiting target...</span></div>
+    </div>
+  </section>
+
+  <!-- ===== RIGHT : PROOF + RESULTS ===== -->
+  <section class="panel">
+    <div class="panel-title">Proof of Testing</div>
+
+    <!-- Baseline info -->
+    <div class="baseline" id="baselineBox" style="display:none">
+      <div>
+        <span class="k">Baseline:</span>
+        <span class="v" id="baselineStatus">—</span>
+      </div>
+      <div>
+        <span class="k">Length:</span>
+        <span class="v" id="baselineLen">—</span>
+      </div>
+      <div>
+        <span class="k">Time:</span>
+        <span class="v" id="baselineMs">—</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat c"><b id="sTotal">0</b><span>Total</span></div>
+      <div class="stat g"><b id="sPass">0</b><span>Pass</span></div>
+      <div class="stat a"><b id="sBy">0</b><span>Bypass</span></div>
+      <div class="stat r"><b id="sBlock">0</b><span>Blocked</span></div>
+    </div>
+
+    <!-- Verdict -->
+    <div class="verdict" id="verdict" style="display:none">
+      <span id="verdictIcon">✔</span>
+      <span id="verdictText">—</span>
+    </div>
+
+    <!-- Results table -->
+    <div class="table-wrap" id="tableWrap" style="display:none">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Vector</th>
+            <th>Path</th>
+            <th>Code</th>
+            <th>Len</th>
+            <th>ms</th>
+            <th>Verdict</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none"
+           stroke="#7b89a6" stroke-width="1.2">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/>
+      </svg>
+      <div>NO SCAN DATA YET</div>
+      <div class="hint">Configure target and press <b>START SCAN</b></div>
+    </div>
+  </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
